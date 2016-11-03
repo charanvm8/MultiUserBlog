@@ -60,6 +60,7 @@ def blog_key(name='default'):
     return db.Key.from_path('blogs', name)
 
 # Default Page
+
 class Main(Handler):
     def get(self):
         deleted_post_id = self.request.get('deleted_post_id')
@@ -98,10 +99,14 @@ class Signup(Handler):
         self.password = self.request.get('password')
         self.verify = self.request.get('verify')
         self.email = self.request.get('email')
+
         # storing parameters
+
         params = dict(username=self.username,
                       email=self.email)
+
         # validation checks
+
         if not valid_username(self.username):
             params['error_username'] = "Not a valid username"
             have_error = True
@@ -128,7 +133,9 @@ class Signup(Handler):
 
 class Register(Signup):
     def done(self):
+
         # Makes sure the user doesn't already exist
+
         u = User.by_name(self.username)
         if u:
             msg = 'That user already exists.'
@@ -141,6 +148,7 @@ class Register(Signup):
             self.redirect('/')
 
 # User login details validation
+
 class Login(Handler):
     def get(self):
         self.render('login.html', error=self.request.get('error'))
@@ -163,7 +171,9 @@ class Logout(Handler):
     def get(self):
         self.logout()
         self.redirect('/')
-#
+
+# Routes back to post page
+
 class PostPage(Handler):
     def get(self, post_id):
 
@@ -194,7 +204,9 @@ class PostPage(Handler):
 
         c = ""
         if(self.user):
+
             # On clicking like, post-like value increases.
+
             if(self.request.get('like') and
                self.request.get('like') == "update"):
                 likes = db.GqlQuery("select * from Like where post_id = " +
@@ -212,6 +224,7 @@ class PostPage(Handler):
                     l.put()
 
             # On commenting, it creates new comment tuple
+
             if(self.request.get('comment')):
                 c = Comment(parent=blog_key(), user_id=self.user.key().id(),
                             post_id=int(post_id),
