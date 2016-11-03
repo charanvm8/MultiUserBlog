@@ -1,6 +1,7 @@
-application: multiuserblog1
 runtime: python27
-threadsafe: yes
+api_version: 1
+threadsafe: true
+
 
 handlers:
 - url: /.*
@@ -8,4 +9,4 @@ handlers:
 
 libraries:
 - name: jinja2
-  version: 2.8
+  version: "2.8"
