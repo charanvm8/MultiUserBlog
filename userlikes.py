@@ -11,4 +11,3 @@ class Like(db.Model):
     def getUserName(self):
         user = User.by_id(self.user_id)
         return user.name
-

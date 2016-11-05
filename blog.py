@@ -12,6 +12,7 @@ secret = 'Eat, sleep, code, repeat'
 
 # Helper functions
 
+
 def make_secure_val(val):
     return '%s|%s' % (val, hmac.new(secret, val).hexdigest())
 
@@ -21,8 +22,8 @@ def check_secure_val(secure_val):
     if secure_val == make_secure_val(val):
         return val
 
-# Main Handler
 
+# Main Handler
 class Handler(webapp2.RequestHandler):
     def write(self, *a, **kw):
         self.response.out.write(*a, **kw)
@@ -59,12 +60,12 @@ class Handler(webapp2.RequestHandler):
 def blog_key(name='default'):
     return db.Key.from_path('blogs', name)
 
-# Default Page
 
+# Default Page
 class Main(Handler):
     def get(self):
         deleted_post_id = self.request.get('deleted_post_id')
-        posts =Post.all().order('-created')
+        posts = Post.all().order('-created')
         self.render('main.html', posts=posts, deleted_post_id=deleted_post_id)
 
 # More Helper functions
@@ -87,8 +88,8 @@ EMAIL_RE = re.compile(r'^[\S]+@[\S]+\.[\S]+$')
 def valid_email(email):
     return not email or EMAIL_RE.match(email)
 
-# Sign up page which validates and register the user
 
+# Sign up page which validates and register the user
 class Signup(Handler):
     def get(self):
         self.render("signup.html")
@@ -147,8 +148,8 @@ class Register(Signup):
             self.login(u)
             self.redirect('/')
 
-# User login details validation
 
+# User login details validation
 class Login(Handler):
     def get(self):
         self.render('login.html', error=self.request.get('error'))
@@ -165,25 +166,25 @@ class Login(Handler):
             msg = 'Invalid login'
             self.render('login.html', error=msg)
 
-# Clears the cookies and safely get backs to default Main page
 
+# Clears the cookies and safely get backs to default Main page
 class Logout(Handler):
     def get(self):
         self.logout()
         self.redirect('/')
 
-# Routes back to post page
 
+# Routes back to post page
 class PostPage(Handler):
     def get(self, post_id):
-
         key = db.Key.from_path('Post', int(post_id), parent=blog_key())
         post = db.get(key)
 
         comments = db.GqlQuery("select * from Comment where post_id = " +
-                               post_id + " order by created desc")
+                               post_id +
+                               " order by created desc")
 
-        likes = db.GqlQuery("select * from Like where post_id="+post_id)
+        likes = db.GqlQuery("select * from Like where post_id=" + post_id)
 
         if not post:
             self.error(404)
@@ -243,7 +244,7 @@ class PostPage(Handler):
                     comments=comments)
 
 
-
+# New Post Page is rendered
 class NewPost(Handler):
     def get(self):
         if self.user:
@@ -269,6 +270,7 @@ class NewPost(Handler):
                         content=content, error=error)
 
 
+# Deletes the current post
 class DeletePost(Handler):
     def get(self, post_id):
         if self.user:
@@ -278,12 +280,14 @@ class DeletePost(Handler):
                 post.delete()
                 self.redirect("/?deleted_post_id="+post_id)
             else:
-                self.redirect("/blog/" + post_id + "?error=No access to delete the record")
+                self.redirect("/blog/" + post_id +
+                              "?error=No access to delete the record")
         else:
             self.redirect("/login?error=You need to be logged, in order" +
                           " to delete your post!!")
 
 
+# Edits the current post
 class EditPost(Handler):
     def get(self, post_id):
         if self.user:
@@ -293,8 +297,8 @@ class EditPost(Handler):
                 self.render("editpost.html", subject=post.subject,
                             content=post.content)
             else:
-                self.redirect("/blog/" + post_id + "?error=No proper access"+
-                                " to edit this post")
+                self.redirect("/blog/" + post_id + "?error=No proper access" +
+                              " to edit this post")
         else:
             self.redirect("/login?error=Please login in to edit the post")
 
@@ -318,6 +322,7 @@ class EditPost(Handler):
                         content=content, error=error)
 
 
+# Deletes the comment of the current user
 class DeleteComment(Handler):
 
     def get(self, post_id, comment_id):
@@ -330,12 +335,14 @@ class DeleteComment(Handler):
                 self.redirect("/blog/"+post_id+"?deleted_comment_id=" +
                               comment_id)
             else:
-                self.redirect("/blog/" + post_id + "?error=No proper"+
-                            +" access to delete this comment")
+                self.redirect("/blog/" + post_id +
+                              "?error=No proper access " +
+                              "to delete this comment")
         else:
             self.redirect("/login?error=Please login in to delete the comment")
 
 
+# Edits the comment of current user
 class EditComment(Handler):
     def get(self, post_id, comment_id):
         if self.user:
@@ -347,6 +354,7 @@ class EditComment(Handler):
             else:
                 self.redirect("/blog/" + post_id +
                               "?error=No proper access to edit this comment")
+
         else:
             self.redirect("/login?error=Please login in to edit the comment")
 
@@ -370,9 +378,6 @@ class EditComment(Handler):
             error = "subject and content, please!"
             self.render("editpost.html", subject=subject,
                         content=content, error=error)
-
-
-
 
 app = webapp2.WSGIApplication([
                                ('/?', Main),
